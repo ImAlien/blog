@@ -1,0 +1,157 @@
+#### [315. 计算右侧小于当前元素的个数](https://leetcode-cn.com/problems/count-of-smaller-numbers-after-self/)
+
+给定一个整数数组 nums，按要求返回一个新数组 counts。数组 counts 有该性质： counts[i] 的值是  nums[i] 右侧小于 nums[i] 的元素的数量。
+
+#### 方法一：暴力统计
+
+直接暴力统计每个数右边的小于他的数，O(n^2)
+
+#### 方法二：二分查找，插入排序
+
+从右往左进行插入排序，
+根据插入的位置计算右边小于该元素的个数。
+
+优化：先使用二分法查找位置，再插入。可以降低内循环查找的时间复杂度O(nlogn)，但是元素交换的次数还是O(n2)。
+
+#### 代码：
+
+```cpp
+class Solution {
+public:
+    vector<int> v;
+    int count(int x){
+        if(v.size() == 0) return 0;
+        int l = 0, r = v.size();
+        while(l < r){
+            int mid = (l+ r)/2;
+            if(v[mid] >= x) r = mid;
+            else l = mid + 1;
+        }
+        return l;
+    }
+    void insert_sort(){
+        int n = v.size();
+        if(n == 1) return;
+        int t = v[n-1];
+        int index = count(t);
+        for(int j = n-1; j > index; j--)
+            v[j] = v[j-1];
+        v[index] = t;
+    }
+    vector<int> countSmaller(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> res(n);
+        for(int i = n-1; i >= 0; i--){
+            int cnt = count(nums[i]);
+            res[i] = cnt;
+            v.push_back(nums[i]);
+            insert_sort();
+        }
+        return res;
+    }
+};
+```
+
+#### 方法三：树状数组
+
+小于nums[i]的数相当于统计nums[i-1]的前缀和。
+
+![image-20200711100134097](https://i.loli.net/2020/07/11/JS5TU8LpvHl4xIF.png)
+
+#### 代码：
+
+```cpp
+class Solution {
+public:
+    struct BIT{//index 1;
+        int n;
+        vector<int> nums;
+        BIT(int n_){
+            n = n_; nums.resize(n+1,0);
+        }
+        inline int lowbit(int x){return x&-x;}
+        void add(int x,int v){
+            while(x <= n){
+                nums[x] += v;
+                x += lowbit(x);
+            }
+        }
+        int query(int x){
+            int res = 0;
+            while(x){
+                res += nums[x];
+                x -= lowbit(x);
+            }
+            return res;
+        }
+    };
+    vector<int> countSmaller(vector<int>& nums) {
+        set<int> s(nums.begin(), nums.end());
+        map<int,int> mp;
+        int index = 0;
+        for(auto& x: s) mp[x] = ++index;
+        //以上四行为离散化
+        BIT bit(index);
+        vector<int> res(nums.size());
+        for(int i = nums.size() - 1; i >= 0; i--){
+            int t = mp[nums[i]];
+            res[i] = bit.query(t-1);
+            bit.add(t,1);
+        }
+        return res;
+    }
+};
+```
+
+#### 方法四：归并排序加索引数组
+
+右边小于该数的个数就是该数逆序对的个数；
+
+直接排序数组然后根据原索引来加减因为原数组的数有重复而不行；
+
+建立一个索引数组，归并排序索引，可行
+
+```cpp
+class Solution {
+public:
+    vector<int> index;
+    vector<int> res;
+    void mergesort(vector<int>& nums, int l , int r){
+        if(l >= r) return;
+        int mid = (l + r)/2;
+        mergesort(nums,l,mid);
+        mergesort(nums,mid+1,r);
+        int i = l, j = mid+1;
+        vector<int> temp;
+        cout << endl;
+        while(i <= mid && j <= r){
+            //每次左边元素弹出时统计右边已弹出的个数
+            if(nums[index[i]] <= nums[index[j]]){
+                temp.push_back(index[i]);
+                res[index[i]] += j - mid - 1;
+                i++;
+            } 
+            else{
+                temp.push_back(index[j++]);
+            }
+        }
+        while(i <= mid) {
+            temp.push_back(index[i]);
+            res[index[i]] += j - mid - 1;
+            i++;
+        }
+        while(j <= r) temp.push_back(index[j++]);
+        i = l;
+        for(auto& x: temp) index[i++] = x;
+    }
+    vector<int> countSmaller(vector<int>& nums) {
+        int n = nums.size();
+        index.resize(n);
+        for(int i = 0; i < n; i++) index[i] = i;
+        res.resize(n);
+        mergesort(nums,0,n - 1);
+        return res;
+    }
+};
+```
+
