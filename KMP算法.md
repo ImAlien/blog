@@ -8,13 +8,81 @@ KMP算法的核心，是一个被称为部分匹配表(Partial Match Table)的�
 
 对于字符串“abababca”，它的PMT如下表所示：
 
-![image-20200703091328179](C:\Users\Alien\AppData\Roaming\Typora\typora-user-images\image-20200703091328179.png)
+![image-20200703091328179](https://i.loli.net/2020/08/06/wHPTKY8hSxk7BGd.png)
 
 **PMT中的值是字符串的前缀集合与后缀集合的交集中最长元素的长度**。
 
 我们看到如果是在 j 位 失配，那么影响 j 指针回溯的位置的其实是第 j −1 位的 PMT 值，所以为了编程的方便， 我们不直接使用PMT数组，而是将PMT数组向后偏移一位。我们把新得到的这个数组称为next数组。
 
 ![image-20200703091803488](C:\Users\Alien\AppData\Roaming\Typora\typora-user-images\image-20200703091803488.png)
+
+## 模板：
+
+有两种模板，一种是像上面讲的next是pmt的后移一位，另一种是next就是pmt；
+
+#### pmt后移一位：
+
+```cpp
+void getNext(){
+    int i = 0, j = -1;
+    ne[0] = -1;
+    while(i < m){
+        if(j == -1 || p[i] == p[j]){
+            i++; j++; ne[i] = j; //attention!
+        }
+        else j = ne[j];
+    }
+}
+int KMP(){
+    int i = 0, j = 0;
+    getNext();
+    while(i < n &&j <m){
+        if(j == -1 || s[i] == p[j]){
+            i++; j++;
+        }
+        else j = ne[j];
+    }
+    if(j == m) return i - j + 1;
+    return -1;
+}
+```
+
+#### 就是pmt：
+
+```cpp
+namespace KMP{
+    vector<int> ne;
+    void getNext(string& p){
+        int m = p.size();
+        ne.resize(m);
+        ne[0] = 0;
+        for(int i = 1; i < m; i++){
+            int j = ne[i - 1];//j初始化为前面数组的最后一位
+            //找到最后一个相同的
+            while (j > 0 && p[i] != p[j]) j = ne[j - 1];
+            if (p[i] == p[j]) j++; //可以向右拓展
+            ne[i] = j;
+        }
+    }
+    //返回所有匹配的位置
+    vector<int> match(string& s, string& p){
+        int n = s.size(), m = p.size();
+        vector<int> res;
+        getNext(p);
+        int i = 0, j = 0;
+        while(i <n){
+            if(s[i] ==p[j]) i++, j++;
+            else if(j) j = ne[j-1]; //j != 0
+            else i++; //j == 0
+            if(j == m){
+                res.push_back(i-j);
+                j = ne[j-1];
+            }
+        }
+        return res;
+    }
+}
+```
 
 ## 例题
 
@@ -141,7 +209,6 @@ int main(){
         scanf("%s",&s);
         getNext();
         printf("Test case #%d\n",cnt++);
-
         for(int i = 2; i <= N; i++){
                 int m=i-next_[i];//如果前缀是周期串，那么m就为一个周期的子串的长度
             if(i%m==0&&next_[i]!=0)
@@ -153,5 +220,97 @@ int main(){
 }
 ```
 
+[UVA11022](https://onlinejudge.org/index.php?option=onlinejudge&page=show_problem&problem=1963)
 
+区间Dp 加Kmp
+
+求子串[l, r]的KMP数组：
+
+```cpp
+void getNext(int l, int r){
+    next_[l] = 0;
+    int i = l + 1;
+    while(i <= r){
+        int j = next_[i - 1];//j初始化为前面数组的最后一位
+        //找到最后一个相同的
+        while (j > 0 && p[i] != p[j+l]) j = next_[j - 1 + l];
+        if (p[i] == p[j+l]) j++; //可以向右拓展
+        next_[i] = j;
+        i++;
+    }
+}
+```
+
+#### [459. 重复的子字符串](https://leetcode-cn.com/problems/repeated-substring-pattern/)
+
+给定一个非空的字符串，判断它是否可以由它的一个子串重复多次构成。给定的字符串只含有小写英文字母，并且长度不超过10000。
+
+#### [28. 实现 strStr()](https://leetcode-cn.com/problems/implement-strstr/)
+
+实现 strStr() 函数。
+
+给定一个 haystack 字符串和一个 needle 字符串，在 haystack 字符串中找出 needle 字符串出现的第一个位置 (从0开始)。如果不存在，则返回  -1。
+
+```cpp
+class Solution {
+public:
+    bool repeatedSubstringPattern(string s) {
+        int n = s.size();
+        int next[n];
+        next[0] = 0;
+        for(int i = 1; i < n; i++){
+            int j = next[i-1];
+            while(j && s[i]!= s[j]) j = next[j-1];
+            if(s[i] == s[j]) j++;
+            next[i] = j;
+        }
+        return next[n-1] > 0 && n%(n-next[n-1]) == 0;
+    }
+};
+```
+
+```cpp
+class Solution {
+public:
+    int strStr(string haystack, string needle) {
+        if(needle.size() == 0) return 0;
+        int m = needle.size();
+        int n = haystack.size();
+        vector<int> next(m);
+        auto getnext = [&](){
+            next[0] = 0;
+            for(int i = 1; i < m;i++){
+                int j = next[i-1];
+                while(j && needle[i] != needle[j]) j = next[j-1];
+                if(needle[i] == needle[j]) j++;
+                next[i] = j; 
+            }
+        };
+        getnext();
+        int i = 0, j = 0;
+        while(i <n &&j <m){
+            if(haystack[i] == needle[j]){
+                i++; j++;
+            }
+            else if(j) j = next[j-1];
+            else i++;
+        }
+        if(j == m) return i - j;
+        return -1;
+    }
+};
+```
+
+#### 应用：
+
+找到最长回文前缀
+
+#### [214. 最短回文串](https://leetcode-cn.com/problems/shortest-palindrome/)
+
+判断是否是周期串
+
+```cpp
+ int m=i-next_[i];//如果前缀是周期串，那么m就为一个周期的子串的长度
+ if(i%m==0&&next_[i]!=0) return true;
+```
 
