@@ -57,3 +57,7 @@ sxb,2=_{ }^{ }
 
 ```
 
+加减乘除
+$$
+\times \quad \div \quad \cdot \quad + -
+$$
