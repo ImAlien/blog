@@ -21,3 +21,11 @@ git remote add origin https://github.com/ImAlien/blog.git
 git push -u origin master
 ```
 
+#### 配置ssh
+
+
+
+```bash
+
+```
+
