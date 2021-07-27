@@ -12,7 +12,10 @@ plt.title("Matplotlib demo")
 plt.xlabel("x axis caption") 
 plt.ylabel("y axis caption") 
 plt.grid(True or False)
-plt.show()
+
+#设置坐标轴
+plt.xlim(0, 1), plt.ylim(0, 1)
+plt.show() 
 plt.subplot(2, 1, 1)
 ```
 

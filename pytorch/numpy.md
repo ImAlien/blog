@@ -30,7 +30,7 @@ z= np.tile(a, (2, 2))
 ### 矩阵乘法
 np.dot(A, B) 
 A @ B
-### 数乘
+### 数乘: 对应相乘
 A * B
 np.multiply(A,B)  
 ### 其他运算
@@ -54,9 +54,20 @@ np.multiply(A,B,out=A)
 .flatten() : 对数组进行降维，返回折叠后的一位数组
 ```
 
+逻辑运算
+
+```python
+a = [True, False, True]
+b = [False, True, True]
+np.bitwise_and(a, b) # [Flase, False, True]
+np.bitwise_or(a, b)
+```
+
+
+
 #### 索引
 
-切片(numpy中是引用， python中是复制)
+切片(numpy中是引用，**python中是复制**)
 
 ```python
 ###### python规则

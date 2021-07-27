@@ -1,3 +1,16 @@
+#### 从终端创建并进入
+
+建立一个.ipynb后缀名的文件，然后加入以下内容
+
+```
+{
+"cells": [],
+"metadata": {},
+"nbformat": 4,
+"nbformat_minor": 2
+}
+```
+
 ## Jupyter 快捷键总结
 
 Jupyter Notebook 有两种键盘输入模式。

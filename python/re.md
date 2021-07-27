@@ -10,7 +10,8 @@ schobj.span()
 schobj.group()
 ## sub
 newstr = re.sub(pattern, repl, string, count=0, flags=0)
-
+## findall
+re.findall(pattern, string)
 ```
 
 

@@ -56,3 +56,27 @@ hv_flip = cv2.flip(image, -1)
 cv2.imwrite("girl-hv.jpg", hv_flip)
 ```
 
+#### 图象处理
+
+##### 边缘检测
+
+关于2个阈值参数：
+
+1. 低于阈值1的像素点会被认为不是边缘；
+2. 高于阈值2的像素点会被认为是边缘；
+3. 在阈值1和阈值2之间的像素点,若与第2步得到的边缘像素点相邻，则被认为是边缘，否则被认为不是边缘。
+
+```python
+import numpy as np
+import cv2 as cv
+from matplotlib import pyplot as plt
+img = cv.imread('mikasa.jpg',0)
+edges = cv.Canny(img,50,100)
+plt.subplot(121),plt.imshow(img,cmap = 'gray')
+plt.title('Original Image'), plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(edges,cmap = 'gray')
+plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
+cv.imwrite('mikasa_process.jpg',edges)
+plt.show()
+```
+
